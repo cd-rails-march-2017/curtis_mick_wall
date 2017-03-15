@@ -1,0 +1,65 @@
+<%if session[:user]%>
+<form class="" action="/login" method="post">
+  <input type="hidden" name="authenticity_token" value="<%=form_authenticity_token%>">
+  <input type="hidden" name="_method" value="DELETE">
+  <input type="submit" value="Logout">
+</form>
+<h3>Welcome, <%=session[:username]%></h3>
+<%else%>
+  <a href="/login">Login</a>
+<%end%>
+
+<h1>The Wall</h1>
+<%if session[:user]%>
+<%if flash[:alert]%>
+  <p><%=flash[:alert]%></p>
+<%end%>
+<form action="/posts" method="post">
+  <input type="hidden" name="authenticity_token" value="<%=form_authenticity_token%>">
+  <h4>Submit A Post</h4>
+  <textarea name="content" rows="8" cols="80"></textarea>
+  <input type="submit" value="POST">
+</form>
+<%else%>
+  <h3><a href="/login">Login</a> to post</h3>
+<%end%>
+<% @posts.each do |post|%>
+<div class="post">
+  <h3><%=post.content%></h3>
+  <h6>- <%=post.user.username%> | <%=post.created_at.strftime("%B %d, %Y")%></h6>
+  <% if session[:user] == post.user.id %>
+    <form action="/posts/<%= post.id %>" method="post">
+      <input type="hidden" name="authenticity_token" value="<%=form_authenticity_token%>">
+      <input type="hidden" name="_method" value="DELETE">
+      <input type="submit" value="Delete">
+    </form>
+  <% end %>
+  <hr>
+  <div class="comments">
+    <% post.comments.each do |comment|%>
+      <p><%= comment.content %></p>
+      <h6>- <%=comment.user.username%> | <%=comment.created_at.strftime("%B %d, %Y")%></h6>
+      <% if session[:user] == comment.user.id %>
+        <form action="/comments/<%= comment.id %>" method="post">
+          <input type="hidden" name="authenticity_token" value="<%=form_authenticity_token%>">
+          <input type="hidden" name="_method" value="DELETE">
+          <input type="submit" value="Delete">
+        </form>
+      <% end %>
+      <hr>
+    <%end%>
+  </div>
+  <%if session[:user]%>
+  <form action="/comments" method="post">
+    <input type="hidden" name="authenticity_token" value="<%=form_authenticity_token%>">
+    <input type="hidden" name="post" value="<%= post.id %>">
+    <h5>Submit A Comment</h5>
+    <textarea name="content" rows="4" cols="40"></textarea>
+    <input type="submit" value="COMMENT">
+  </form>
+  <%else%>
+    <h6><a href="/login">Login</a> to comment</h6>
+  <%end%>
+
+</div>
+<%end%>
